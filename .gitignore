@@ -1,0 +1,11 @@
+.venv/
+api/.venv/
+__pycache__/
+*.pyc
+.env
+
+web/node_modules/
+web/dist/
+web/build/
+.next/
+coverage/
