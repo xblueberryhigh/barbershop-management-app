@@ -18,7 +18,6 @@ def root():
     return {"message": "Barbershop management api running"}
 
 
-# Add GET /auth/me.
 # Decide how the first admin is created.
 # Add booking conflict rules in booking_service.py.
 # Expand the booking model to include at least a barber/staff assignment.

@@ -20,7 +20,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 20
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login-user")
 
 
 def create_access_token(data: dict) -> str:
@@ -48,6 +48,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user_id = payload.get("sub")
 
     if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     db_user = db.query(User).filter(User.id == int(user_id)).first()
