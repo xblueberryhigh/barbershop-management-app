@@ -5,13 +5,15 @@ from app.database import get_db
 from app.enums import UserRole
 from app.models import User
 from app.schemas import UserRegister, UserResponse, UserLogin, TokenResponse
-from app.security import hash_password, verify_password, create_access_token
+from app.security import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-
-@router.post("/register", response_model=UserResponse)
-def register_user(user: UserRegister, db: Session = Depends(get_db)):
+@router.post("/create-user", response_model=UserResponse)
+def create_user(user: UserRegister, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Only admins can create users")
     validate_email_is_available(db, user.email)
     # Check what the best practices are for storing passwords
 
@@ -32,8 +34,7 @@ def register_user(user: UserRegister, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=400, detail="Email already exists")
     
-
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login-user", response_model=TokenResponse)
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
     db_user = get_user_by_email(db, user.email)
 
@@ -46,6 +47,10 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": str(db_user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
 
 def validate_email_is_available(db: Session, user_email: str) -> None:
     existing_user = db.query(User).filter(User.email == user_email).first()
@@ -53,6 +58,5 @@ def validate_email_is_available(db: Session, user_email: str) -> None:
     if existing_user is not None:
         raise HTTPException(status_code=400, detail="Email already exists")
     
-
 def get_user_by_email(db: Session, user_email: str):
     return db.query(User).filter(User.email == user_email).first()

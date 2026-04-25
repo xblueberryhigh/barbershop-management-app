@@ -26,7 +26,6 @@ class UserRegister(BaseModel):
             raise ValueError("Cannot be blank")
         return value
 
-
 class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=100)
@@ -47,7 +46,6 @@ class UserLogin(BaseModel):
             raise ValueError("Password cannot be blank")
         return value
 
-
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,11 +55,9 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: UserRole
 
-
 class TokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"]
-
 
 class CustomerCreate(BaseModel):
     first_name: str = Field(min_length=2, max_length=30)
@@ -76,7 +72,6 @@ class CustomerCreate(BaseModel):
         if not value:
             raise ValueError("Cannot be blank")
         return value
-
 
 class BookingCreate(BaseModel):
     customer_id: int

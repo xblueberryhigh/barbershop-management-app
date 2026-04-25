@@ -18,13 +18,11 @@ def create_booking(db: Session, booking: BookingCreate) -> Booking:
 
     return get_booking_with_relations(db, new_booking.id)
 
-
 def get_customer_or_404(db: Session, customer_id: int) -> Customer:
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
-
 
 def get_booking_with_relations(db: Session, booking_id: int) -> Booking:
     booking = (

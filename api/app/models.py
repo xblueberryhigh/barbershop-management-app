@@ -19,7 +19,6 @@ class User(Base):
         nullable=False,
     )
 
-
 class Customer(Base):
     __tablename__ = "customers"
 
