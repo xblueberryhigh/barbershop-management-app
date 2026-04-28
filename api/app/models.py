@@ -18,6 +18,7 @@ class User(Base):
         SQLEnum(UserRole, native_enum=False, values_callable=enum_values),
         nullable=False,
     )
+    bookings = relationship("Booking", back_populates="barber")
 
 class Customer(Base):
     __tablename__ = "customers"
@@ -33,6 +34,7 @@ class Booking(Base):
     __tablename__ = "bookings"
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
+    barber_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
     status = Column(
@@ -41,3 +43,4 @@ class Booking(Base):
     )
 
     customer = relationship("Customer", back_populates="bookings")
+    barber = relationship("User", back_populates="bookings")

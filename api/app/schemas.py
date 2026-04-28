@@ -75,6 +75,7 @@ class CustomerCreate(BaseModel):
 
 class BookingCreate(BaseModel):
     customer_id: int
+    barber_id: int
     start_time: datetime
     end_time: datetime
     status: BookingStatus
@@ -99,4 +100,5 @@ class BookingResponse(BaseModel):
     end_time: datetime
     status: BookingStatus
     customer: CustomerResponse
+    barber: UserResponse
     

@@ -1,8 +1,6 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from app import models
-from app.database import Base, engine
 from app.routes.customers import router as customers_router
 from app.routes.bookings import router as bookings_router
 from app.routes.auth import router as auth_router
@@ -19,6 +17,5 @@ def root():
 
 
 # Expand the booking model to include at least a barber/staff assignment.
-# Add tests for login, protected routes, and booking conflicts.
 # Start the frontend only after those API rules are stable.
 
