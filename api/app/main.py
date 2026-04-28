@@ -16,6 +16,5 @@ def root():
     return {"message": "Barbershop management api running"}
 
 
-# Expand the booking model to include at least a barber/staff assignment.
 # Start the frontend only after those API rules are stable.
 
