@@ -35,7 +35,7 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('hashed_password', sa.String(), nullable=False),
-    sa.Column('role', sa.Enum('admin', 'user', name='userrole', native_enum=False), nullable=False),
+    sa.Column('role', sa.Enum('admin', 'barber', name='userrole', native_enum=False), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)

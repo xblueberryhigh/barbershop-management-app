@@ -79,7 +79,7 @@ def user_factory(db_session):
 
     def create_user(
         *,
-        role: UserRole = UserRole.USER,
+        role: UserRole = UserRole.BARBER,
         password: str = "Password123",
         first_name: str = "Test",
         last_name: str = "User",

@@ -1,8 +1,11 @@
+from datetime import time, datetime
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
+
+from app.enums import BookingStatus, UserRole
 from app.models import Booking, Customer, User
 from app.schemas import BookingCreate
-from datetime import time, datetime
 
 OPEN_TIME = time(8, 0)
 BREAK_START = time(12, 0)
@@ -77,7 +80,11 @@ def check_valid_booking_time(start_time: datetime, end_time: datetime):
         raise HTTPException(status_code=400, detail="Booking cannot overlap the lunch break")
     
 def check_barber_exists(db: Session, barber_id: int):
-    barber = db.query(User).filter(User.id == barber_id).first()
+    barber = (
+        db.query(User.id)
+        .filter(User.id == barber_id, User.role == UserRole.BARBER)
+        .first()
+    )
 
     if barber is None:
         raise HTTPException(status_code=404, detail="Barber not found")
@@ -90,6 +97,7 @@ def check_booking_conflict(db: Session, start_time: datetime, end_time: datetime
             Booking.barber_id == barber_id,
             Booking.start_time < end_time,
             Booking.end_time > start_time,
+            Booking.status == BookingStatus.CONFIRMED
         )
         .first()
     )

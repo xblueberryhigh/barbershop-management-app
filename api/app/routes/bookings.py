@@ -15,7 +15,7 @@ def get_bookings(
 ):
     return (
         db.query(Booking)
-        .options(joinedload(Booking.customer), joinedload(Booking.barber))
+        .options(joinedload(Booking.customer), joinedload(Booking.barber)).order_by(Booking.start_time)
         .all()
     )
 

@@ -26,13 +26,19 @@ def previous_business_day_at(hour: int, minute: int = 0) -> datetime:
     return candidate.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
 
-def booking_payload(customer_id: int, barber_id: int, start_time: datetime, end_time: datetime) -> dict:
+def booking_payload(
+    customer_id: int,
+    barber_id: int,
+    start_time: datetime,
+    end_time: datetime,
+    status: BookingStatus = BookingStatus.CONFIRMED,
+) -> dict:
     return {
         "customer_id": customer_id,
         "barber_id": barber_id,
         "start_time": start_time.isoformat(),
         "end_time": end_time.isoformat(),
-        "status": BookingStatus.CONFIRMED.value,
+        "status": status.value,
     }
 
 
@@ -75,7 +81,7 @@ def test_create_booking_returns_booking_with_customer_and_barber(
         "first_name": barber.first_name,
         "last_name": barber.last_name,
         "email": barber.email,
-        "role": UserRole.USER.value,
+        "role": UserRole.BARBER.value,
     }
     assert response_data["status"] == BookingStatus.CONFIRMED.value
     assert response_data["start_time"] == start_time.isoformat()
@@ -112,6 +118,25 @@ def test_create_booking_rejects_unknown_barber(client, user_headers, customer_fa
     assert response.json() == {"detail": "Barber not found"}
 
 
+def test_create_booking_rejects_admin_as_barber(client, user_headers, customer_factory, user_factory):
+    customer = customer_factory()
+    admin_user = user_factory(
+        role=UserRole.ADMIN,
+        email="manager@example.com",
+    )
+    start_time = next_business_day_at(10, 0)
+    end_time = next_business_day_at(11, 0)
+
+    response = client.post(
+        "/bookings",
+        headers=user_headers,
+        json=booking_payload(customer.id, admin_user.id, start_time, end_time),
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Barber not found"}
+
+
 def test_create_booking_rejects_overlapping_booking_for_same_barber(
     client,
     user_headers,
@@ -142,6 +167,43 @@ def test_create_booking_rejects_overlapping_booking_for_same_barber(
     assert first_response.status_code == 200
     assert second_response.status_code == 400
     assert second_response.json() == {"detail": "Booking conflicts with an existing booking"}
+
+
+def test_create_booking_allows_overlap_when_existing_booking_is_cancelled(
+    client,
+    user_headers,
+    customer_factory,
+    user_factory,
+):
+    customer = customer_factory()
+    barber = user_factory()
+    start_time = next_business_day_at(10, 0)
+    end_time = next_business_day_at(11, 0)
+
+    first_response = client.post(
+        "/bookings",
+        headers=user_headers,
+        json=booking_payload(
+            customer.id,
+            barber.id,
+            start_time,
+            end_time,
+            status=BookingStatus.CANCELLED,
+        ),
+    )
+    second_response = client.post(
+        "/bookings",
+        headers=user_headers,
+        json=booking_payload(
+            customer.id,
+            barber.id,
+            start_time + timedelta(minutes=30),
+            end_time + timedelta(minutes=30),
+        ),
+    )
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 200
 
 
 def test_create_booking_allows_overlapping_booking_for_different_barbers(
@@ -279,7 +341,46 @@ def test_get_bookings_returns_nested_customer_and_barber_data(
                 "first_name": "Chris",
                 "last_name": "Clipper",
                 "email": barber.email,
-                "role": UserRole.USER.value,
+                "role": UserRole.BARBER.value,
             },
         }
+    ]
+
+
+def test_get_bookings_returns_bookings_sorted_by_start_time(
+    client,
+    user_headers,
+    customer_factory,
+    user_factory,
+):
+    customer = customer_factory(first_name="Order", last_name="Check")
+    barber = user_factory(first_name="Sorted", last_name="Barber", email="sorted.barber@example.com")
+    later_start = next_business_day_at(11, 0)
+    later_end = next_business_day_at(12, 0)
+    earlier_start = next_business_day_at(9, 0)
+    earlier_end = next_business_day_at(10, 0)
+
+    later_response = client.post(
+        "/bookings",
+        headers=user_headers,
+        json=booking_payload(customer.id, barber.id, later_start, later_end),
+    )
+    earlier_response = client.post(
+        "/bookings",
+        headers=user_headers,
+        json=booking_payload(customer.id, barber.id, earlier_start, earlier_end),
+    )
+    list_response = client.get("/bookings", headers=user_headers)
+
+    assert later_response.status_code == 200
+    assert earlier_response.status_code == 200
+    assert list_response.status_code == 200
+    response_data = list_response.json()
+    assert [booking["id"] for booking in response_data] == [
+        earlier_response.json()["id"],
+        later_response.json()["id"],
+    ]
+    assert [booking["start_time"] for booking in response_data] == [
+        earlier_start.isoformat(),
+        later_start.isoformat(),
     ]

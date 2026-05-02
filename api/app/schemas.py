@@ -55,6 +55,15 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: UserRole
 
+class AssignableUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    first_name: str
+    last_name: str
+    role: UserRole
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"]

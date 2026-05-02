@@ -22,7 +22,7 @@ def create_user(user: UserRegister, db: Session = Depends(get_db), current_user:
         last_name=user.last_name,
         email=user.email,
         hashed_password=hash_password(user.password),
-        role=UserRole.USER,
+        role=UserRole.BARBER,
     )
     db.add(new_user)
 

@@ -2,7 +2,7 @@ from enum import Enum
 
 class UserRole(str, Enum):
     ADMIN = "admin"
-    USER = "user"
+    BARBER = "barber"
 
 class BookingStatus(str, Enum):
     CONFIRMED = "confirmed"

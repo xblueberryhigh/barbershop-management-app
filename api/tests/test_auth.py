@@ -38,7 +38,7 @@ def test_me_returns_authenticated_user(client, regular_user, user_headers):
         "first_name": regular_user.first_name,
         "last_name": regular_user.last_name,
         "email": regular_user.email,
-        "role": UserRole.USER.value,
+        "role": UserRole.BARBER.value,
     }
 
 
@@ -60,7 +60,7 @@ def test_admin_can_create_user(client, admin_headers):
     assert response_data["first_name"] == "New"
     assert response_data["last_name"] == "Staff"
     assert response_data["email"] == "new.staff@example.com"
-    assert response_data["role"] == UserRole.USER.value
+    assert response_data["role"] == UserRole.BARBER.value
 
 
 def test_non_admin_cannot_create_user(client, user_headers):
