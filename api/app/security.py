@@ -1,3 +1,4 @@
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from passlib.context import CryptContext
@@ -9,7 +10,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 import os
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 

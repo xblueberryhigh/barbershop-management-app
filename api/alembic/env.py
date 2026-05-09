@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 import os
+from pathlib import Path
 
 from alembic import context
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ from sqlalchemy import engine_from_config, pool
 from app.database import Base
 from app import models
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 config = context.config
 

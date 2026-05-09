@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -9,7 +10,7 @@ from app.security import hash_password
 
 
 def main():
-    load_dotenv()
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
     email = os.getenv("FIRST_ADMIN_EMAIL")
     password = os.getenv("FIRST_ADMIN_PASSWORD")
