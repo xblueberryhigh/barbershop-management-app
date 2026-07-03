@@ -5,4 +5,8 @@ const api = axios.create({
   baseURL: 'http://localhost:8000',
 })
 
+export async function checkBackend() {
+  await api.get('/')
+}
+
 export default api
